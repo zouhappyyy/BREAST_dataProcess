@@ -4,6 +4,7 @@ from typing import Any, Optional
 import pydicom
 import pandas as pd
 import tqdm
+import argparse
 
 
 # 提取Dicom相关信息
@@ -16,8 +17,6 @@ def extract_dicom_info(dicom_file_path: str) -> Optional[dict[str, Any]]:
         print(f'Exclude: Modality except MG but {dicom_data.Modality} -> {dicom_file_path}')
         return None
 
-    # print(dicom_data.dir())
-    # exit(0)
     try:
         # DICOM文件的基本信息
         extracted_info: dict[str, Any] = {
@@ -96,6 +95,9 @@ def indexer_to_dataframe(indexer: list[dict]) -> pd.DataFrame:
     data_dict: dict = {k: [v[k] for v in indexer] for k in indexer[0].keys()}
     return pd.DataFrame(data_dict)
 
+
+def main(args):
+    pass
 
 if __name__ == '__main__':
     # extracted_info: dict[str, Any] = extract_dicom_info(
