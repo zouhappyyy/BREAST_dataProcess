@@ -1,6 +1,6 @@
 import os
 import os.path as osp
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 import pydicom
 import pandas as pd
 import tqdm
@@ -8,7 +8,7 @@ import argparse
 
 
 # 提取Dicom相关信息
-def extract_dicom_info(dicom_file_path: str) -> Optional[dict[str, Any]]:
+def extract_dicom_info(dicom_file_path: str) -> Optional[Dict[str, Any]]:
     # 读取DICOM文件
     dicom_data: pydicom.dataset.FileDataset = pydicom.dcmread(dicom_file_path)
 
@@ -19,7 +19,7 @@ def extract_dicom_info(dicom_file_path: str) -> Optional[dict[str, Any]]:
 
     try:
         # DICOM文件的基本信息
-        extracted_info: dict[str, Any] = {
+        extracted_info: Dict[str, Any] = {
             '病人标识符': dicom_data.PatientID,
             '序列号': dicom_data.SeriesNumber,
             '实例号': dicom_data.InstanceNumber,
@@ -45,7 +45,7 @@ def extract_dicom_info(dicom_file_path: str) -> Optional[dict[str, Any]]:
 
 
 # 合成样本名称
-def merge_sample_name(extracted_info: dict[str, Any]) -> str:
+def merge_sample_name(extracted_info: Dict[str, Any]) -> str:
     acquisition_device_processing_code: str = extracted_info['采集设备处理代码']
     short_processing_code: str = str.split(acquisition_device_processing_code, '_')[1]
     sample_name: str = '_'.join([
@@ -58,13 +58,13 @@ def merge_sample_name(extracted_info: dict[str, Any]) -> str:
 
 
 # 扫描数据目录，生成数据源索引表
-def generate_data_source_indexer(source_root_path: str) -> list[dict]:
-    indexer: list[dict] = []
+def generate_data_source_indexer(source_root_path: str) -> List[Dict]:
+    indexer: List[Dict] = []
     tot_count: int = 0
     with tqdm.tqdm(desc='Progress') as pbar:
         for root, dirs, files in os.walk(source_root_path):
             # print((root, dirs, files))
-            # dcm_files: list[str] = [p for p in files if osp.splitext(p)[1] == '.dcm']
+            # dcm_files: List[str] = [p for p in files if osp.splitext(p)[1] == '.dcm']
             dcm_files = files
             if len(dcm_files) == 0: continue
             for dcmf in dcm_files:
@@ -75,7 +75,7 @@ def generate_data_source_indexer(source_root_path: str) -> list[dict]:
                     tot_count += 1
                     continue
                 accession_number: str = osp.split(root)[-1]
-                item: dict[str, Any] = {
+                item: Dict[str, Any] = {
                     'accession_number': accession_number,
                     'dcm_file_name': dcmf,
                     'dcm_rel_path': osp.relpath(dcm_abs_path, source_root_path),
@@ -90,9 +90,9 @@ def generate_data_source_indexer(source_root_path: str) -> list[dict]:
 
 
 # 数据源索引表转换为组表
-def indexer_to_dataframe(indexer: list[dict]) -> pd.DataFrame:
+def indexer_to_dataframe(indexer: List[Dict]) -> pd.DataFrame:
     if indexer is None or len(indexer) == 0: return None
-    data_dict: dict = {k: [v[k] for v in indexer] for k in indexer[0].keys()}
+    data_dict: Dict = {k: [v[k] for v in indexer] for k in indexer[0].keys()}
     return pd.DataFrame(data_dict)
 
 
@@ -100,16 +100,33 @@ def main(args):
     pass
 
 if __name__ == '__main__':
-    # extracted_info: dict[str, Any] = extract_dicom_info(
+    # extracted_info: Dict[str, Any] = extract_dicom_info(
     #     r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
     # print(f'extracted_info: {extracted_info}')
     # sample_name: str = merge_sample_name(extracted_info)
     # print(f'sample_name: {sample_name}')
-    # indexer: list[dict] = generate_data_source_indexer(r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像')
+    # indexer: List[Dict] = generate_data_source_indexer(r'E:\乳腺数据集\至2023-7-12CESM图像\3-15图像')
     # indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
     # indexer_dataframe.to_csv('generated_materials\data_source_indexer\indexer.csv', index=False)
 
-    dicom_data: pydicom.dataset.FileDataset = pydicom.dcmread(r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
-    print(dicom_data.dir())
-    for k in dicom_data.dir():
-        print(dicom_data[k])
+    # dicom_data: pydicom.dataset.FileDataset = pydicom.dcmread(r"E:\乳腺数据集\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421083112.831.dcm")
+    # print(dicom_data.dir())
+    # for k in dicom_data.dir():
+    #     print(dicom_data[k])
+    # 创建 ArgumentParser 对象
+    parser = argparse.ArgumentParser(description="Process data in a specified root path.")
+
+    # 添加 rootpath 参数
+    parser.add_argument('--rootpath', type=str, help='Specify the root path for data processing', required=True)
+    parser.add_argument('--csvpath', type=str, help='Specify the root path for data processing', required=True)
+
+    # 解析命令行参数
+    args = parser.parse_args()
+
+    # 获取参数值
+    root_path = args.rootpath
+    csv_path = args.csvpath
+
+    indexer: List[Dict] = generate_data_source_indexer(root_path)
+    indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
+    indexer_dataframe.to_csv(csv_path, index=False)

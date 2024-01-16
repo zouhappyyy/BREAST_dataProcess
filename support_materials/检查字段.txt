@@ -40,3 +40,6 @@
 
 // 模态（MG=MAMMOGRAPHIC）
 (0008,0060)   Modality   MG
+
+//Structured Reporting 是一种用于在医学影像中结构化报告信息的标准。
+//SR Document 是一种 DICOM 文件类型，它允许医疗图像和相关信息以结构化的方式进行报告。
