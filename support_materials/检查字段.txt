@@ -1,0 +1,42 @@
+// 病人标识符
+(0010, 0020) Patient ID P5470625
+
+// 序列号（表示病人进行的某一部位的检查）
+(0020, 0011) Series Number 110571
+
+// 实例号（表示一次完整的扫描，每个Instance对应于一个DICOM文件）
+(0020,0013)   Instance Number   1
+
+// 成像类型 
+(0008,0008)   Image Type   ORIGINAL\PRIMARY\\LOW_ENERGY
+
+// 图像偏侧性（R-右，L-左，U-非配对，B-双侧）
+(0020,0062)   Image Laterality   L
+
+// 投照体位
+// 头尾位（CC=CranioCaudal）
+(0018,5101)   View Position   CC
+// 内外侧斜位（MLO=MedioLateral Oblique）
+(0018,5101)   View Position   MLO
+
+// 头尾位（CC）上下正投影
+// 内外侧斜位（MLO）从上轴侧45°向下外体侧投影
+
+// 采集设备处理代码
+// 全数字化乳腺X线摄影-乳腺钼靶（FFDM=Full-Field Digital Mammography）
+(0018,1401)   Acquisition Device Processing Code   GEMS_FFDM_PV
+// 对比增强能谱乳腺 X 摄影（CESM=Contrast-Enhanced Specral Mammograpy）
+(0018,1401)   Acquisition Device Processing Code   GEMS_CESM_1
+
+// GEMS=General Electric Medical Systems Dicom 协议
+
+// CESM 是在 “乳腺钼靶” 基础上衍生的一项新技术，
+// 通过注射碘对比剂观察病灶是否增强 “变亮”，并通过
+// “变亮” 的图像形态及细节征象，进而更好的评价病灶
+// 性质，提高乳腺癌的检出
+
+// 检查部位
+(0018,0015)   Body Part Examined   BREAST
+
+// 模态（MG=MAMMOGRAPHIC）
+(0008,0060)   Modality   MG
