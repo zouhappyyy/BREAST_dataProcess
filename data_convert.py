@@ -26,7 +26,7 @@ def extract_dicom_info(dicom_file_path: str) -> Optional[dict[str, Any]]:
             '成像类型': dicom_data.ImageType,
             '图像偏侧性': dicom_data.ImageLaterality,
             '投照体位': dicom_data.ViewPosition,
-            '采集设备处理代码': dicom_data[0x0018, 0x1401].value,  # Acquisition Device Processing Code
+            '采集设备处理代码': dicom_data['AcquisitionDeviceProcessingCode'].value,  # Acquisition Device Processing Code
             '检查部位': dicom_data.BodyPartExamined,
             '模态': dicom_data.Modality,
         }
@@ -101,10 +101,15 @@ def main(args):
 
 if __name__ == '__main__':
     # extracted_info: dict[str, Any] = extract_dicom_info(
-    #     r'F:\CBIBF3\storage\Dataset\NII_Mammography\乳腺数据集源\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
+    #     r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
     # print(f'extracted_info: {extracted_info}')
     # sample_name: str = merge_sample_name(extracted_info)
     # print(f'sample_name: {sample_name}')
-    indexer: list[dict] = generate_data_source_indexer(r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像')
-    indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
-    indexer_dataframe.to_csv('generated_materials\data_source_indexer\indexer.csv', index=False)
+    # indexer: list[dict] = generate_data_source_indexer(r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像')
+    # indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
+    # indexer_dataframe.to_csv('generated_materials\data_source_indexer\indexer.csv', index=False)
+
+    dicom_data: pydicom.dataset.FileDataset = pydicom.dcmread(r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
+    print(dicom_data.dir())
+    for k in dicom_data.dir():
+        print(dicom_data[k])
