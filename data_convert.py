@@ -2,6 +2,7 @@ import os
 import os.path as osp
 from typing import Any, Optional, Dict, List
 import pydicom
+import itk
 import pandas as pd
 import tqdm
 import argparse
@@ -36,11 +37,6 @@ def extract_dicom_info(dicom_file_path: str) -> Optional[Dict[str, Any]]:
         # print(dicom_data)
         return None
 
-    # 如果DICOM文件包含图像，您可以显示图像
-    # import matplotlib.pyplot as plt
-    # plt.imshow(dicom_data.pixel_array, cmap=plt.cm.bone)
-    # plt.show()
-
     return extracted_info
 
 
@@ -58,10 +54,10 @@ def merge_sample_name(extracted_info: Dict[str, Any]) -> str:
 
 
 # 扫描数据目录，生成数据源索引表
-def generate_data_source_indexer(source_root_path: str) -> List[Dict]:
-    indexer: List[Dict] = []
+def generate_data_source_indexer(source_root_path: str) -> List[Dict[str, Any]]:
+    indexer: List[Dict[str, Any]] = []
     tot_count: int = 0
-    with tqdm.tqdm(desc='Progress') as pbar:
+    with tqdm.tqdm(desc='Indexing') as pbar:
         for root, dirs, files in os.walk(source_root_path):
             # print((root, dirs, files))
             # dcm_files: List[str] = [p for p in files if osp.splitext(p)[1] == '.dcm']
@@ -90,43 +86,72 @@ def generate_data_source_indexer(source_root_path: str) -> List[Dict]:
 
 
 # 数据源索引表转换为组表
-def indexer_to_dataframe(indexer: List[Dict]) -> pd.DataFrame:
+def indexer_to_dataframe(indexer: List[Dict[str, Any]]) -> pd.DataFrame:
     if indexer is None or len(indexer) == 0: return None
     data_dict: Dict = {k: [v[k] for v in indexer] for k in indexer[0].keys()}
     return pd.DataFrame(data_dict)
 
 
-def main(args):
-    pass
+# 基于索引表将DICOM转换为NII，输出到指定路径
+def dicom_convert_to_nii(indexer: List[Dict[str, Any]], source_root_path: str, target_root_path: str):
+    """
+    indexer: {
+        'accession_number': UCRxxxxxxxxxxxx作为目录,
+        'dcm_file_name': 源文件名称（带扩展名，不带目录）,
+        'dcm_rel_path': 源文件相对于数据源根的相对路径,
+        'target_rel_path': 输出到指定根相对路径
+    }
+    """
+    with tqdm.tqdm(total=len(indexer), desc='Converting') as pbar:
+        for idx in indexer:
+            abs_target_dir_path: str = osp.abspath(osp.join(target_root_path, idx['accession_number']))
+            abs_source_file_path: str = osp.abspath(osp.join(source_root_path, idx['dcm_rel_path']))
+            abs_target_file_path: str = osp.abspath(osp.join(target_root_path, idx['target_rel_path'] + '.nii.gz'))
+
+            # 建立目录
+            os.makedirs(abs_target_dir_path, exist_ok=True)
+
+            # DICOM转换到NII
+            # 读取DICOM文件
+            image = itk.imread(abs_source_file_path)
+
+            # 保存为Nitfi文件
+            itk.imwrite(image, abs_target_file_path)
+            pbar.update(1)
+
+
+def main(args: argparse.Namespace):
+    # 获取参数值
+    data_source_path = args.data_source_path
+    manifest_csv_path = args.manifest_csv_log_path
+    target_root_path = args.target_path
+
+    indexer: List[Dict[str, Any]] = generate_data_source_indexer(data_source_path)
+
+    # 打印数据源解析日志
+    indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
+    indexer_dataframe.to_csv(manifest_csv_path, index=False)
+
+    dicom_convert_to_nii(indexer, data_source_path, target_root_path)
+
 
 if __name__ == '__main__':
-    # extracted_info: Dict[str, Any] = extract_dicom_info(
-    #     r'F:\CBIBF3\storage\Dataset\NII_Mammography\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421082853.811.dcm')
-    # print(f'extracted_info: {extracted_info}')
-    # sample_name: str = merge_sample_name(extracted_info)
-    # print(f'sample_name: {sample_name}')
-    # indexer: List[Dict] = generate_data_source_indexer(r'E:\乳腺数据集\至2023-7-12CESM图像\3-15图像')
-    # indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
-    # indexer_dataframe.to_csv('generated_materials\data_source_indexer\indexer.csv', index=False)
-
-    # dicom_data: pydicom.dataset.FileDataset = pydicom.dcmread(r"E:\乳腺数据集\至2023-7-12CESM图像\3-15图像\UCR202204210055\1.2.840.113619.2.255.22424451157206.22797220421083112.831.dcm")
-    # print(dicom_data.dir())
-    # for k in dicom_data.dir():
-    #     print(dicom_data[k])
     # 创建 ArgumentParser 对象
-    parser = argparse.ArgumentParser(description="Process data in a specified root path.")
+    parser = argparse.ArgumentParser(description="钼靶DICOM转NII例程")
 
     # 添加 rootpath 参数
-    parser.add_argument('--rootpath', type=str, help='Specify the root path for data processing', required=True)
-    parser.add_argument('--csvpath', type=str, help='Specify the root path for data processing', required=True)
+    parser.add_argument('-dsp', '--data_source_path', type=str, help='钼靶DICOM数据源根目录', required=True)
+    parser.add_argument('-mcp', '--manifest_csv_log_path', type=str, help='CSV清单日志文件输出路径', required=True)
+    parser.add_argument('-tp', '--target_path', type=str, help='目标数据集根目录', required=True)
+
+    # python data_convert.py --data_source_path 钼靶DICOM数据源根目录 --manifest_csv_log_path 数据源清单文件 --target_path 目标数据集根目录
 
     # 解析命令行参数
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
-    # 获取参数值
-    root_path = args.rootpath
-    csv_path = args.csvpath
+    main(args)
 
-    indexer: List[Dict] = generate_data_source_indexer(root_path)
-    indexer_dataframe: pd.DataFrame = indexer_to_dataframe(indexer)
-    indexer_dataframe.to_csv(csv_path, index=False)
+    # 如果DICOM文件包含图像，您可以显示图像
+    # import matplotlib.pyplot as plt
+    # plt.imshow(dicom_data.pixel_array, cmap=plt.cm.bone)
+    # plt.show()
