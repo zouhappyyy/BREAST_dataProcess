@@ -1,0 +1,35 @@
+乳腺钼靶检查是一种低剂量的X射线拍摄技术。与一般的X线机使用阳极钨钯面不同，钼钯靶面产生的是波长为0.063--0.071nm的长波长、穿透力较弱的软射线。
+
+// 成像类型
+['ORIGINAL', 'PRIMARY', '', 'LOW_ENERGY']
+['DERIVED', 'PRIMARY', '', 'RECOMBINED']
+['ORIGINAL', 'PRIMARY', '', 'HIGH_ENERGY']
+['DERIVED', 'SECONDARY', '', 'LOW_ENER']
+
+// 图像偏侧性（R-右，L-左，U-非配对，B-双侧）
+(0020,0062)   Image Laterality   L
+
+// 投照体位
+CC  // 头尾位（CC=CranioCaudal）
+MLO // 内外侧斜位（MLO=MedioLateral Oblique）
+ML  // 内外侧位
+LM  // 外内侧位
+XCCM    // 增强头尾内位
+
+// 采集设备处理代码
+GEMS_FFDM_PV    // 全数字化乳腺X线摄影-乳腺钼靶（FFDM=Full-Field Digital Mammography）
+GEMS_CESM_1     // 对比增强能谱乳腺X摄影（CESM=Contrast-Enhanced Specral Mammograpy）
+
+// 曝光控制模式
+AUTOMATIC   // 自动
+MANUAL      // 手动
+
+// 像素明度相关性
+LIN // 线性
+LOG // 对数
+
+// 生成日期
+YYYYMMDD
+
+// 生成时间
+hhmmss:f
