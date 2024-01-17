@@ -59,13 +59,13 @@ def merge_sample_name(extracted_info: Dict[str, Any]) -> str:
     short_processing_code: str = 'UND' if acquisition_device_processing_code == 'UND' else str.split(acquisition_device_processing_code, '_')[1]
     sample_name: str = '_'.join([
         extracted_info['登记号'],
-        extracted_info['病人标识符'],
-        extracted_info['曝光控制模式'],
-        extracted_info['像素明度相关性'],
-        extracted_info['生成日期'],
-        extracted_info['生成时间'],
-        extracted_info['图像偏侧性'],
+        # extracted_info['病人标识符'],
+        # extracted_info['曝光控制模式'],
+        # extracted_info['像素明度相关性'],
+        # extracted_info['生成日期'],
+        # extracted_info['生成时间'],
         extracted_info['投照体位'],
+        extracted_info['图像偏侧性'],
         short_processing_code,
     ])
     return sample_name
@@ -96,7 +96,8 @@ def generate_data_source_indexer(source_root_path: str) -> List[Dict[str, Any]]:
                     'DICOM相对路径': osp.relpath(dcm_abs_path, source_root_path),
                     'Nifti相对路径': ''
                 }
-                if extracted_info['成像类型'][1] == 'PRIMARY' and \
+                if extracted_info['投照体位'] in {'CC', 'MLO'} and \
+                        extracted_info['成像类型'][1] == 'PRIMARY' and \
                         extracted_info['成像类型'][3] in {'LOW_ENERGY', 'RECOMBINED'} and \
                         extracted_info['采集设备处理代码'] in {'GEMS_FFDM_PV', 'GEMS_CESM_1'} and \
                         extracted_info['像素明度相关性'] == 'LOG':
@@ -128,6 +129,7 @@ def dicom_convert_to_nii(indexer: List[Dict[str, Any]], source_root_path: str, t
         'Nifti相对路径': 输出到指定根相对路径
     }
     """
+    convert_count: int = 0
     with tqdm.tqdm(total=len(indexer), desc='Converting') as pbar:
         for idx in indexer:
             if idx['Nifti相对路径'] == '':
@@ -147,6 +149,9 @@ def dicom_convert_to_nii(indexer: List[Dict[str, Any]], source_root_path: str, t
             # 保存为Nitfi文件
             itk.imwrite(image, abs_target_file_path)
             pbar.update(1)
+            convert_count += 1
+
+    print(f'Total: {len(indexer)}, Convert: {convert_count}, Excluded: {len(indexer) - convert_count}')
 
 
 def main(args: argparse.Namespace):
