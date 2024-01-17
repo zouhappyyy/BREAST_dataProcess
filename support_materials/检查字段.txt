@@ -25,7 +25,7 @@
 // 采集设备处理代码
 // 全数字化乳腺X线摄影-乳腺钼靶（FFDM=Full-Field Digital Mammography）
 (0018,1401)   Acquisition Device Processing Code   GEMS_FFDM_PV
-// 对比增强能谱乳腺 X 摄影（CESM=Contrast-Enhanced Specral Mammograpy）
+// 对比增强能谱乳腺X摄影（CESM=Contrast-Enhanced Specral Mammograpy）
 (0018,1401)   Acquisition Device Processing Code   GEMS_CESM_1
 
 // GEMS=General Electric Medical Systems Dicom 协议
