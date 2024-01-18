@@ -89,9 +89,8 @@ def generate_data_source_indexer(source_root_path: str) -> List[Dict[str, Any]]:
                     pbar.update(1)
                     tot_count += 1
                     continue
-                accession_number: str = osp.split(root)[-1]
                 item: Dict[str, Any] = {
-                    '登记号': accession_number,
+                    '登记号': extracted_info['登记号'],
                     'DICOM源文件名': dcmf,
                     'DICOM相对路径': osp.relpath(dcm_abs_path, source_root_path),
                     'Nifti相对路径': ''
@@ -101,7 +100,7 @@ def generate_data_source_indexer(source_root_path: str) -> List[Dict[str, Any]]:
                         extracted_info['成像类型'][3] in {'LOW_ENERGY', 'RECOMBINED'} and \
                         extracted_info['采集设备处理代码'] in {'GEMS_FFDM_PV', 'GEMS_CESM_1'} and \
                         extracted_info['像素明度相关性'] == 'LOG':
-                    item['Nifti相对路径'] = osp.join(accession_number, merge_sample_name(extracted_info))
+                    item['Nifti相对路径'] = osp.join(extracted_info['登记号'], merge_sample_name(extracted_info))
                     convert_count += 1
                 item.update(extracted_info)
                 indexer.append(item)
@@ -178,7 +177,7 @@ if __name__ == '__main__':
     parser.add_argument('-mcp', '--manifest_csv_log_path', type=str, help='CSV清单日志文件输出路径', required=True)
     parser.add_argument('-tp', '--target_path', type=str, help='目标数据集根目录', required=True)
 
-    # python data_convert.py --data_source_path 钼靶DICOM数据源根目录 --manifest_csv_log_path 数据源清单文件 --target_path 目标数据集根目录
+    # python convert.py --data_source_path 钼靶DICOM数据源根目录 --manifest_csv_log_path 数据源清单文件 --target_path 目标数据集根目录
 
     # 解析命令行参数
     args: argparse.Namespace = parser.parse_args()
