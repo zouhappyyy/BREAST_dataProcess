@@ -46,9 +46,9 @@ def main(args: argparse.Namespace):
 
 if __name__ == '__main__':
     # 创建 ArgumentParser 对象
-    parser = argparse.ArgumentParser(description="钼靶DICOM转NII例程")
+    parser = argparse.ArgumentParser(description="NIFTI转换结果统计例程")
 
-    # 添加 rootpath 参数
+    # 参数定义
     parser.add_argument('-dsp', '--data_source_path', type=str, help='钼靶NIFTI数据源根目录', required=True)
     parser.add_argument('-mcp', '--manifest_csv_log_path', type=str, help='CSV清单日志文件输出路径', required=True)
 
@@ -56,5 +56,6 @@ if __name__ == '__main__':
 
     # 解析命令行参数
     args: argparse.Namespace = parser.parse_args()
+    print(args)
 
     main(args)
