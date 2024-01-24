@@ -152,7 +152,8 @@ cython_debug/
 .idea/
 
 # Custom
-logs/
+.log/
 samples/
 generated_materials/data_convert/NII_Mammography/
+generated_materials/data_convert/contrast_study/
 playground.py

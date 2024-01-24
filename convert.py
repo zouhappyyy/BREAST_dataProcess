@@ -184,8 +184,3 @@ if __name__ == '__main__':
     print(args)
 
     main(args)
-
-    # 如果DICOM文件包含图像，您可以显示图像
-    # import matplotlib.pyplot as plt
-    # plt.imshow(dicom_data.pixel_array, cmap=plt.cm.bone)
-    # plt.show()
