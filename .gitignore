@@ -154,6 +154,8 @@ cython_debug/
 # Custom
 .log/
 samples/
-generated_materials/data_convert/NII_Mammography/
-generated_materials/data_convert/contrast_study/
+generated_materials/001_data_cleansing/NII_Mammography/
+generated_materials/001_data_cleansing/contrast_study/
+generated_materials/001_data_cleansing/NII_manual_inspect/manual_inspect_samples/
+generated_materials/001_data_cleansing/NII_manual_inspect/removed_samples/
 playground.py
